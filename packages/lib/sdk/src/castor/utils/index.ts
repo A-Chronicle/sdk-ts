@@ -19,7 +19,7 @@ function toMethodRecord(methods: readonly DIDMethodInput[]): Record<string, DIDM
 
 function getDefaultMethods(): readonly DIDMethodInput[] {
     return [
-        new PrismDIDMethod(),
+        new PrismDIDMethod("https://raw.githubusercontent.com/FabioPinheiro/prism-vdr/refs/heads/main/mainnet/diddoc/"),
         new PeerDIDMethod(),
     ];
 }
@@ -147,9 +147,12 @@ export async function computeEncnumbasis(
             material = authenticationFromPublicKey(publicKey);
             multibaseEcnumbasis = createMultibaseEncnumbasis(material);
             return multibaseEcnumbasis.slice(1);
-        default:
-            //TODO: Improve this error handling
-            throw new Error("computeEncnumbasis -> InvalidKeyPair Curve");
+        default: {
+            const currentCurve = publicKey.getProperty(Domain.KeyProperties.curve);
+            throw new Domain.CastorError.InvalidKeyError(
+                `Unsupported curve for PeerDID key derivation: ${currentCurve}. Supported curves: ${Domain.Curve.ED25519}, ${Domain.Curve.X25519}`
+            );
+        }
     }
 
 }
