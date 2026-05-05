@@ -4,7 +4,7 @@ import { Task } from "../../../utils/tasks";
 import { SDJwtVcInstance, type SdJwtVcPayload, } from "@sd-jwt/sd-jwt-vc";
 import type { DisclosureFrame } from '@sd-jwt/types';
 import { type Plugins } from "../../../plugins";
-import { FindSigningKeys } from "../../../edge-agent/didFunctions/FindDIDSigningKeys";
+import { FindIssuerSigningKeys } from "../../../edge-agent/didFunctions/FindDIDSigningKeys";
 import { expect } from "../../../utils";
 
 /**
@@ -23,17 +23,15 @@ interface Args {
   header?: Partial<Domain.JWT.Header>;
   disclosureFrame: DisclosureFrame<SdJwtVcPayload>;
   privateKey?: Domain.PrivateKey;
-  purpose?: keyof Pick<Domain.PrismDIDKeys, "AUTHENTICATION_KEY" | "ISSUING_KEY">;
 }
 
 export class CreateSDJWT extends Task<string, Args> {
 
   async run(ctx: Plugins.Context) {
     const signingKeys = await ctx.run(
-      new FindSigningKeys({
+      new FindIssuerSigningKeys({
         did: this.args.did,
-        privateKey: this.args.privateKey,
-        purpose: this.args.purpose ?? "ISSUING_KEY",
+        privateKey: this.args.privateKey
       })
     );
     const signingKey = signingKeys.at(0);
