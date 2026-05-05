@@ -17,6 +17,11 @@ export interface SigningKeyData {
   privateKey: Domain.PrivateKey;
 }
 
+interface FindSigningKeysArgs {
+  did: Domain.DID;
+  privateKey?: Domain.PrivateKey;
+}
+
 /**
  * Search for the PrivateKeys that should be used for signing
  * return PrivateKey and information useful to signing operations
@@ -107,5 +112,25 @@ export class FindSigningKeys extends Task<SigningKeyData[], Args> {
     }
 
     return []
+  }
+}
+
+export class FindIssuerSigningKeys extends Task<SigningKeyData[], FindSigningKeysArgs> {
+  async run(ctx: AgentContext) {
+    return ctx.run(new FindSigningKeys({
+      did: this.args.did,
+      privateKey: this.args.privateKey,
+      purpose: "ISSUING_KEY"
+    }));
+  }
+}
+
+export class FindAuthenticationSigningKeys extends Task<SigningKeyData[], FindSigningKeysArgs> {
+  async run(ctx: AgentContext) {
+    return ctx.run(new FindSigningKeys({
+      did: this.args.did,
+      privateKey: this.args.privateKey,
+      purpose: "AUTHENTICATION_KEY"
+    }));
   }
 }
